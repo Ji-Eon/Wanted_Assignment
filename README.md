@@ -36,7 +36,7 @@
 ```sh
   Flask서버에서 구현되어있는 API Document를 확인할 수 있으며 API 실행결과까지 확인할 수 있습니다.
 ```
-
+![ininital](https://github.com/Ji-Eon/Wanted_Assignment/blob/main/Git-Image/image_1.png?raw=true)
 ### GET Method : CompanyList 전체 가져오기 ####
 - http://localhost:5000/wanted/companylist
 
