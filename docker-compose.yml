@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+
+  ## Flask Server
+  web:
+    build: ./services/web
+    command: python manage.py run -h 0.0.0.0
+    volumes:
+      - ./services/web/:/usr/src/app/
+    ports:
+      - 5000:5000
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+
+  ## PostgreSQL
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=hello_flask
+      - POSTGRES_PASSWORD=hello_flask
+      - POSTGRES_DB=hello_flask_dev
+
+  ## Web Pgadmin    
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    depends_on:
+     - db
+    ports:
+     - 8088:80
+    environment:
+     - PGADMIN_DEFAULT_EMAIL=medikim3551@gmail.com
+     - PGADMIN_DEFAULT_PASSWORD=akdlfem12  
+volumes:
+  postgres_data:
