@@ -83,7 +83,6 @@ class CompnayNameSearch(Resource):
             
             }
                 results.append(obj)
-            print(results)
             return jsonify(results,200)
             
         elif name_type=='company_en':
@@ -96,7 +95,6 @@ class CompnayNameSearch(Resource):
                
             }
                 results.append(obj)
-            print(results)
             return jsonify(results,200)
             
         elif name_type=='company_ja':
@@ -109,7 +107,6 @@ class CompnayNameSearch(Resource):
             
             }
                 results.append(obj)
-            print(results)
             return jsonify(results,200)
   
 # Tag 기준 회사명 검색      
@@ -140,7 +137,6 @@ class CompanyTagSearch(Resource):
                 'tag_ja' : company.tag_ja
             }
                 results.append(obj)
-            print(results)
             return jsonify(results,200)
             
         elif tag_type=='tag_en':
@@ -157,7 +153,6 @@ class CompanyTagSearch(Resource):
                 'tag_ja' : company.tag_ja
             }
                 results.append(obj)
-            print(results)
             return jsonify(results,200)
             
         elif tag_type=='tag_ja':
@@ -174,7 +169,6 @@ class CompanyTagSearch(Resource):
                 'tag_ja' : company.tag_ja
             }
                 results.append(obj)
-            print(results)
             return jsonify(results,200)
 
 # Tag 기준 컬럼 삭제    
