@@ -34,6 +34,7 @@ class WantedCompany(db.Model):
     tag_ja = db.Column(db.Text)
 
    
+# 회사정보 전체 가져오기
 @search_api.route("/companylist", methods=['GET'])
 class CompanyList(Resource):
     @search_api.doc(responses={200: 'Success'})
@@ -57,7 +58,7 @@ class CompanyList(Resource):
 
         return jsonify(results,200)
     
-    
+# Name기준 회사명 검색    
 @search_api.route("/search/name/<string:name_type>/<string:value>", methods=['GET'])
 class CompnayNameSearch(Resource):
     @staticmethod    
@@ -110,7 +111,8 @@ class CompnayNameSearch(Resource):
                 results.append(obj)
             print(results)
             return jsonify(results,200)
-        
+  
+# Tag 기준 회사명 검색      
 @search_api.route("/search/tag/<string:tag_type>/<string:value>", methods=['GET','DELETE'])
 class CompanyTagSearch(Resource):
     @staticmethod    
@@ -175,6 +177,7 @@ class CompanyTagSearch(Resource):
             print(results)
             return jsonify(results,200)
 
+# Tag 기준 컬럼 삭제    
 @search_api.route("/tag/delete/<string:tag_type>/<string:value>", methods=['DELETE'])
 class TagDelete(Resource):
     @staticmethod    
@@ -208,7 +211,7 @@ class TagDelete(Resource):
             return Response('Delete Success',204)
 
   
-
+# Tag 기준 컬럼 내용 업데이트    
 @search_api.route("/tag/put/<string:tag_type>/<string:tag_value>/<string:update_value>", methods=['PUT'])
 class TagUpdate(Resource):
     @staticmethod    
