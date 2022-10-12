@@ -58,7 +58,7 @@ class CompanyList(Resource):
         return jsonify(results,200)
     
     
-@search_api.route("/search/name/<string:name_type>/<string:value>/", methods=['GET'])
+@search_api.route("/search/name/<string:name_type>/<string:value>", methods=['GET'])
 class CompnayNameSearch(Resource):
     @staticmethod    
     @search_api.doc(responses={200: 'Success'})
@@ -111,7 +111,7 @@ class CompnayNameSearch(Resource):
             print(results)
             return jsonify(results,200)
         
-@search_api.route("/search/tag/<string:tag_type>/<string:value>/", methods=['GET','DELETE'])
+@search_api.route("/search/tag/<string:tag_type>/<string:value>", methods=['GET','DELETE'])
 class CompanyTagSearch(Resource):
     @staticmethod    
     @search_api.doc(responses={200: 'Success'})
@@ -175,7 +175,7 @@ class CompanyTagSearch(Resource):
             print(results)
             return jsonify(results,200)
 
-@search_api.route("/tag/delete/<string:tag_type>/<string:value>/", methods=['DELETE'])
+@search_api.route("/tag/delete/<string:tag_type>/<string:value>", methods=['DELETE'])
 class TagDelete(Resource):
     @staticmethod    
     @search_api.doc(responses={204: 'Delete'})
