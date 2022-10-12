@@ -40,6 +40,7 @@
 ### GET Method : CompanyList 전체 가져오기 ####
 - http://localhost:5000/wanted/companylist
 
+
 ### GET Method : Company Name / Tag 검색 ###
 ```sh
  Name / Tag 를 두개 Class로 나누어서 구현하였습니다.
@@ -49,12 +50,14 @@
 ```sh
  회사 이름으로 검색할수 있도록 한 / 영 / 일 부분과 검색값을 넣어주면 관련된 회사명 검색하여 return 해 줍니다.
 ```
+![ininital](https://raw.githubusercontent.com/Ji-Eon/Wanted_Assignment/ed0747c7592d181d309f2a7591a42791d2274c88/Git-Image/image_2.png)
+
 - http://localhost:5000/wanted/search/tag/tag_type/value
 - tag_type [ tag_ko,tag_en,tag_ja  ], tag_type 정확히 입력해 주어야 합니다.
 ```sh
 태그 이름으로 검색할수 있도록 한 / 영 / 일 부분과 검색값을 넣어주면 관련된 회사Tag를 검색하여 return 해 줍니다.
 ```
-
+![ininital](https://raw.githubusercontent.com/Ji-Eon/Wanted_Assignment/ed0747c7592d181d309f2a7591a42791d2274c88/Git-Image/image_3.png)
 
 ### DELETE Method : 회사 Tag정보 삭제 ###
 ```sh
@@ -63,6 +66,7 @@
 - http://localhost:5000/wanted/tag/delete/tag_type/value
 - tag_type [ tag_ko,tag_en,tag_ja ]
 - value : 검색값
+![ininital](https://raw.githubusercontent.com/Ji-Eon/Wanted_Assignment/ed0747c7592d181d309f2a7591a42791d2274c88/Git-Image/image_4.png)
 
 ### Update Method : 회사 Tag정보 업데이트 ###
 ```sh
@@ -72,8 +76,7 @@
 - tag_type [tag_ko,tag_en,tag_ja]
 - tag_vlae: 검색값
 - update_value: 변경값
-
-
+![ininital](https://raw.githubusercontent.com/Ji-Eon/Wanted_Assignment/ed0747c7592d181d309f2a7591a42791d2274c88/Git-Image/image_5.png)
 
 # 👤 ** Developer Ji-EOn**
 
