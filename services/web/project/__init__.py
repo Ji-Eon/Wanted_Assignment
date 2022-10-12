@@ -55,8 +55,13 @@ class CompanyList(Resource):
             
             }
             results.append(obj)
+       
+        if results:
+            return jsonify(results,200)
+        else:
+            return jsonify('Not found',404)
 
-        return jsonify(results,200)
+        
     
 # Name기준 회사명 검색    
 @search_api.route("/search/name/<string:name_type>/<string:value>", methods=['GET'])
@@ -71,19 +76,21 @@ class CompnayNameSearch(Resource):
     
     
     def get(name_type,value):
-        
+     
         if name_type=='company_ko':
             value = "%{}%".format(value)
             search_query = WantedCompany.query.filter(WantedCompany.company_ko.like(value))
             results = []
             for company in search_query:
                 obj = {
-                'company_ko' : company.company_ko,
-               
-            
+                'company_ko' : company.company_ko,    
             }
                 results.append(obj)
-            return jsonify(results,200)
+                
+            if results:
+                return jsonify(results,200)
+            else:
+                return jsonify('Not found',404)
             
         elif name_type=='company_en':
             value = "%{}%".format(value)
@@ -95,8 +102,12 @@ class CompnayNameSearch(Resource):
                
             }
                 results.append(obj)
-            return jsonify(results,200)
-            
+                
+            if results:
+                return jsonify(results,200)
+            else:
+                return jsonify('Not found',404)
+                        
         elif name_type=='company_ja':
             search_query = WantedCompany.query.filter(WantedCompany.company_ja.like(value))
             results = []
@@ -107,8 +118,12 @@ class CompnayNameSearch(Resource):
             
             }
                 results.append(obj)
-            return jsonify(results,200)
-  
+                
+                
+            if results:
+                return jsonify(results,200)
+            else:
+                return jsonify('Not found',404)  
 # Tag 기준 회사명 검색      
 @search_api.route("/search/tag/<string:tag_type>/<string:value>", methods=['GET','DELETE'])
 class CompanyTagSearch(Resource):
