@@ -31,34 +31,37 @@
 
 
 ### URL Description
-#### Swagger 
+### Swagger 
 - http://localhost:5000/api-docs
 ```sh
   Flask서버에서 구현되어있는 API Document를 확인할 수 있으며 API 실행결과까지 확인할 수 있습니다.
 ```
 
-#### GET Method : CompanyList 전체 가져오기 ####
+### GET Method : CompanyList 전체 가져오기 ####
 - http://localhost:5000/wanted/companylist
 
 ### GET Method : Company Name / Tag 검색 ###
+```sh
+ Name / Tag 를 두개 Class로 나누어서 구현하였습니다.
+```
 - http://localhost:5000/wanted/search/name/name_type/value
+- name_type [ company_ko,company_en,company_ja ], name_tpye은 정확히 입력해 주어야 합니다.
 ```sh
  회사 이름으로 검색할수 있도록 한 / 영 / 일 부분과 검색값을 넣어주면 관련된 회사명 검색하여 return 해 줍니다.
 ```
-- http://localhost:5000/wanted/search/tag/name_type/value
+- http://localhost:5000/wanted/search/tag/tag_type/value
+- tag_type [ tag_ko,tag_en,tag_ja  ], tag_type 정확히 입력해 주어야 합니다.
 ```sh
-- Name / Tag 를 두개 Class로 나누어서 구현하였습니다.
-- name_type [ company_ko,company_en,company_ja ]
-- value : 검색값
-름으로 검색할수 있도록 한 / 영 / 일 부분과 검색값을 넣어주면 관련된 회사Tag를 검색하여 return 해 줍니다.
+태그 이름으로 검색할수 있도록 한 / 영 / 일 부분과 검색값을 넣어주면 관련된 회사Tag를 검색하여 return 해 줍니다.
 ```
+
 
 ### DELETE Method : 회사 Tag정보 삭제 ###
 ```sh
  Method는 Delete로 최종 반영값은 Update를 이용하여 해당내용을 삭제할 수 있도록 로직을 구현하였습니다.
 ```
 - http://localhost:5000/wanted/tag/delete/tag_type/value
-- tag_type [tag_ko,tag_en,tag_ja]
+- tag_type [ tag_ko,tag_en,tag_ja ]
 - value : 검색값
 
 ### Update Method : 회사 Tag정보 업데이트 ###
@@ -75,5 +78,3 @@
 # 👤 ** Developer Ji-EOn**
 
 - Github: [@Ji-Eon](https://github.com/Ji-Eon)
-
-- email: [@Ji-Eon](medikim3551@gmail.com)
