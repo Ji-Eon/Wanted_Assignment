@@ -123,7 +123,8 @@ class CompnayNameSearch(Resource):
             if results:
                 return jsonify(results,200)
             else:
-                return jsonify('Not found',404)  
+                return jsonify('Not found',404)
+            
 # Tag 기준 회사명 검색      
 @search_api.route("/search/tag/<string:tag_type>/<string:value>", methods=['GET','DELETE'])
 class CompanyTagSearch(Resource):
@@ -152,8 +153,12 @@ class CompanyTagSearch(Resource):
                 'tag_ja' : company.tag_ja
             }
                 results.append(obj)
-            return jsonify(results,200)
-            
+                
+            if results:
+                return jsonify(results,200)
+            else:
+                return jsonify('Not found',404)       
+                   
         elif tag_type=='tag_en':
             value = "%{}%".format(value)
             search_query = WantedCompany.query.filter(WantedCompany.tag_en.like(value))
@@ -168,7 +173,11 @@ class CompanyTagSearch(Resource):
                 'tag_ja' : company.tag_ja
             }
                 results.append(obj)
-            return jsonify(results,200)
+            
+            if results:
+                return jsonify(results,200)
+            else:
+                return jsonify('Not found',404)     
             
         elif tag_type=='tag_ja':
             value = "%{}%".format(value)
@@ -184,13 +193,17 @@ class CompanyTagSearch(Resource):
                 'tag_ja' : company.tag_ja
             }
                 results.append(obj)
-            return jsonify(results,200)
+                
+            if results:
+                return jsonify(results,200)
+            else:
+                return jsonify('Not found',404)     
 
 # Tag 기준 컬럼 삭제    
 @search_api.route("/tag/delete/<string:tag_type>/<string:value>", methods=['DELETE'])
 class TagDelete(Resource):
     @staticmethod    
-    @search_api.doc(responses={204: 'Delete'})
+    @search_api.doc(responses={200: 'Delete'})
     @search_api.doc(responses={404: 'Not found'})
     @search_api.doc(responses={405: 'Not allowed'})
     @search_api.doc(responses={400: 'Bad request'})
@@ -199,25 +212,35 @@ class TagDelete(Resource):
         if tag_type=='tag_ko':
     
             search_query = WantedCompany.query.filter(WantedCompany.tag_ko == value).update(dict(tag_ko=""))
-          
-            db.session.commit() # 데이터에 반영
             
-            return Response('Delete Success',204)
+            if search_query:
+                db.session.commit() # 데이터에 반영
+            
+                return Response('Delete Success',200)
+            else:
+                return jsonify('Not found',404)     
 
-  
         elif tag_type=='tag_en':
             search_query = WantedCompany.query.filter(WantedCompany.tag_en == value).update(dict(tag_en=""))
           
-            db.session.commit() # 데이터에 반영
-  
-            return Response('Delete Success',204)
+            if search_query:
+                db.session.commit() # 데이터에 반영
+            
+                return Response('Delete Success',200)
+            else:
+                return jsonify('Not found',404)     
         
         elif tag_type=='tag_ja':
             search_query = WantedCompany.query.filter(WantedCompany.tag_ja == value).update(dict(tag_ja=""))
           
             db.session.commit() # 데이터에 반영
   
-            return Response('Delete Success',204)
+            if search_query:
+                db.session.commit() # 데이터에 반영
+            
+                return Response('Delete Success',200)
+            else:
+                return jsonify('Not found',404)  
 
   
 # Tag 기준 컬럼 내용 업데이트    
@@ -234,20 +257,32 @@ class TagUpdate(Resource):
 
             search_query = WantedCompany.query.filter(WantedCompany.tag_ko == tag_value).update(dict(tag_ko=update_value))
           
-            db.session.commit() # 데이터에 반영
-            
-            return Response('Update Success',200)
 
+            if search_query:
+                db.session.commit() # 데이터에 반영
+            
+                return Response('Update Success',200)
+            else:
+                return jsonify('Not found',404)  
+            
+            
   
         elif tag_type=='tag_en':
             search_query = WantedCompany.query.filter(WantedCompany.tag_en == tag_value).update(dict(tag_en=update_value))
           
-            db.session.commit() # 데이터에 반영
-  
-            return Response('Update Success',200)
+            if search_query:
+                db.session.commit() # 데이터에 반영
+            
+                return Response('Update Success',200)
+            else:
+                return jsonify('Not found',404)  
+            
         elif tag_type=='tag_ja':
             search_query = WantedCompany.query.filter(WantedCompany.tag_ja == tag_value).update(dict(tag_ja=update_value))
           
-            db.session.commit() # 데이터에 반영
-  
-            return Response('Update Success',200)
+            if search_query:
+                db.session.commit() # 데이터에 반영
+            
+                return Response('Update Success',200)
+            else:
+                return jsonify('Not found',404)  
