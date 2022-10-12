@@ -78,6 +78,6 @@
 - update_value: 변경값
 ![ininital](https://raw.githubusercontent.com/Ji-Eon/Wanted_Assignment/ed0747c7592d181d309f2a7591a42791d2274c88/Git-Image/image_5.png)
 
-# 👤 ** Developer Ji-EOn**
+# 👤 ** Volunteer Ji-Eon **
 
 - Github: [@Ji-Eon](https://github.com/Ji-Eon)
