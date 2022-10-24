@@ -17,9 +17,8 @@ RUN pip install --upgrade pip
 RUN pip install flask_restx
 RUN pip install pandas
 COPY ./requirements.txt /usr/src/app/requirements.txt
+RUN pip install -U flask-paginate
 RUN pip install -r requirements.txt
 # copy project
 COPY . /usr/src/app/
 
-# run entrypoint.sh , DB 생성 및 DB 데이터 입력
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

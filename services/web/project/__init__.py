@@ -1,6 +1,8 @@
 from operator import concat
 import os
 from pydoc import render_doc
+from telnetlib import WILL
+
 import pandas as pd
 from flask import (
     Flask,
@@ -9,280 +11,272 @@ from flask import (
     Response,
 
 )
+from decimal import *
+
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import delete
+from flask import render_template, request, flash, redirect, url_for
 
 from flask_restx import Api, Resource, reqparse
+from flask_paginate import Pagination, get_page_args
+
+import psycopg2
+
 app = Flask(__name__)
 api = Api(app, version='1.0', title='API 문서', description='Swagger 문서', doc="/api-docs")
 search_api = api.namespace('search',path='/wanted', description='조회 API')
 
-app.config.from_object("project.config.Config")
-db = SQLAlchemy(app)
 
 
-## MODEL 
-class WantedCompany(db.Model):
-    __tablename__ = "wantedcompany"
+def get_db_connection():
+    db = psycopg2.connect(
+            host="49.50.167.136",
+            database="synthea_1000",
+            user='walker101',
+            password='forcebewithyou')
 
-    id = db.Column(db.Integer, primary_key=True)
-    company_ko = db.Column(db.Text)
-    company_en = db.Column(db.Text)
-    company_ja = db.Column(db.Text)
-    tag_ko = db.Column(db.Text)
-    tag_en = db.Column(db.Text)
-    tag_ja = db.Column(db.Text)
+    # Open a cursor to perform database operations
+    cur = db.cursor()
+    return cur
 
-   
-# 회사정보 전체 가져오기
-@search_api.route("/companylist", methods=['GET'])
-class CompanyList(Resource):
-    @search_api.doc(responses={200: 'Success'})
-    @search_api.doc(responses={404: 'Not found'})
-    def get(self):
-        WantedCompany_all = WantedCompany.query.all()
-        results = []
-
-        for company in WantedCompany_all:
-            obj = {
-                'id' : company.company_ko,
-                'company_ko' : company.company_ko,
-                'company_en' : company.company_en,
-                'company_ja' : company.company_ja,
-                'tag_ko' : company.tag_ko,
-                'tag_en' : company.tag_en,
-                'tag_ja' : company.tag_ja
-            
-            }
-            results.append(obj)
+def concept_drug(column_name,concept_id):
+    cur  = get_db_connection()
+    offset=0
+    per_page=10
+    
+    query = f"SELECT drug_exposure_id ,person_id ,drug_concept_id from de.drug_exposure where {column_name} = {concept_id};" 
+    cur.execute(query)
        
-        if results:
-            return jsonify(results,200)
-        else:
-            return jsonify('Not found',404)
-
+    rows = cur.fetchall()
+    
+    dicts = {}
+    reuslt = []
+    for row in rows :
         
+        dicts = {"drug_exposure_id":row[0],"person_id":row[1],"drug_concept_id":row[2]}
+        reuslt.append(dicts)
+   
+  
+    page, per_page, offset = get_page_args(page_parameter='page',
+                                           per_page_parameter='per_page')
     
-# Name기준 회사명 검색    
-@search_api.route("/search/name/<string:name_type>/<string:value>", methods=['GET'])
-class CompnayNameSearch(Resource):
-    @staticmethod    
-    @search_api.doc(responses={200: 'Success'})
-    @search_api.doc(responses={201: 'Create'})
-    @search_api.doc(responses={204: 'Delete'})
-    @search_api.doc(responses={404: 'Not found'})
-    @search_api.doc(responses={405: 'Not allowed'})
-    @search_api.doc(responses={400: 'Bad request'})
+    total = len(reuslt)
+    pagination_users  = reuslt[offset: offset + per_page]
+    pagination = Pagination(page=page, per_page=per_page, total=total,
+                            css_framework='bootstrap4')
+    return pagination_users, page,per_page,pagination
     
+
+def concept(column_name,concept_id):
+    cur  = get_db_connection()
+    offset=0
+    per_page=10
     
-    def get(name_type,value):
-     
-        if name_type=='company_ko':
-            value = "%{}%".format(value)
-            search_query = WantedCompany.query.filter(WantedCompany.company_ko.like(value))
-            results = []
-            for company in search_query:
-                obj = {
-                'company_ko' : company.company_ko,    
-            }
-                results.append(obj)
-                
-            if results:
-                return jsonify(results,200)
-            else:
-                return jsonify('Not found',404)
-            
-        elif name_type=='company_en':
-            value = "%{}%".format(value)
-            search_query = WantedCompany.query.filter(WantedCompany.company_en.like(value))
-            results = []
-            for company in search_query:
-                obj = {
-                'company_en' : company.company_en,
-               
-            }
-                results.append(obj)
-                
-            if results:
-                return jsonify(results,200)
-            else:
-                return jsonify('Not found',404)
-                        
-        elif name_type=='company_ja':
-            search_query = WantedCompany.query.filter(WantedCompany.company_ja.like(value))
-            results = []
-            for company in search_query:
-                obj = {
-                'company_ja' : company.company_ja,
-               
-            
-            }
-                results.append(obj)
-                
-                
-            if results:
-                return jsonify(results,200)
-            else:
-                return jsonify('Not found',404)
-            
-# Tag 기준 회사명 검색      
-@search_api.route("/search/tag/<string:tag_type>/<string:value>", methods=['GET','DELETE'])
-class CompanyTagSearch(Resource):
-    @staticmethod    
-    @search_api.doc(responses={200: 'Success'})
-    @search_api.doc(responses={201: 'Create'})
-    @search_api.doc(responses={204: 'Delete'})
-    @search_api.doc(responses={404: 'Not found'})
-    @search_api.doc(responses={405: 'Not allowed'})
-    @search_api.doc(responses={400: 'Bad request'})
+    query = f"SELECT concept_id ,concept_name ,domain_id,vocabulary_id,concept_code from de.concept where {column_name} = {concept_id};" 
+    cur.execute(query)
+       
+    rows = cur.fetchall()
     
-    
-    def get(tag_type,value):
+    dicts = {}
+    reuslt = []
+    for row in rows :
         
-        if tag_type=='tag_ko':
-            value = "%{}%".format(value)
-            search_query = WantedCompany.query.filter(WantedCompany.tag_ko.like(value))
-            results = []
-            for company in search_query:
-                obj = {
-                'company_ko' : company.company_ko,
-                'company_en' : company.company_en,
-                'company_ja' : company.company_ja,
-                'tag_ko' : company.tag_ko,
-                'tag_en' : company.tag_en,
-                'tag_ja' : company.tag_ja
-            }
-                results.append(obj)
-                
-            if results:
-                return jsonify(results,200)
-            else:
-                return jsonify('Not found',404)       
-                   
-        elif tag_type=='tag_en':
-            value = "%{}%".format(value)
-            search_query = WantedCompany.query.filter(WantedCompany.tag_en.like(value))
-            results = []
-            for company in search_query:
-                obj = {
-                'company_ko' : company.company_ko,
-                'company_en' : company.company_en,
-                'company_ja' : company.company_ja,
-                'tag_ko' : company.tag_ko,
-                'tag_en' : company.tag_en,
-                'tag_ja' : company.tag_ja
-            }
-                results.append(obj)
-            
-            if results:
-                return jsonify(results,200)
-            else:
-                return jsonify('Not found',404)     
-            
-        elif tag_type=='tag_ja':
-            value = "%{}%".format(value)
-            search_query = WantedCompany.query.filter(WantedCompany.tag_ja.like(value))
-            results = []
-            for company in search_query:
-                obj = {
-                'company_ko' : company.company_ko,
-                'company_en' : company.company_en,
-                'company_ja' : company.company_ja,
-                'tag_ko' : company.tag_ko,
-                'tag_en' : company.tag_en,
-                'tag_ja' : company.tag_ja
-            }
-                results.append(obj)
-                
-            if results:
-                return jsonify(results,200)
-            else:
-                return jsonify('Not found',404)     
-
-# Tag 기준 컬럼 삭제    
-@search_api.route("/tag/delete/<string:tag_type>/<string:value>", methods=['DELETE'])
-class TagDelete(Resource):
-    @staticmethod    
-    @search_api.doc(responses={200: 'Delete'})
-    @search_api.doc(responses={404: 'Not found'})
-    @search_api.doc(responses={405: 'Not allowed'})
-    @search_api.doc(responses={400: 'Bad request'})
-     
-    def delete(tag_type,value):
-        if tag_type=='tag_ko':
+        dicts = {"concept_id":row[0],"concept_name":row[1],"domain_id":row[2],"vocabulary_id":row[3],"concept_code":row[4]}
+        reuslt.append(dicts)
+   
+    page, per_page, offset = get_page_args(page_parameter='page',
+                                           per_page_parameter='per_page')
     
-            search_query = WantedCompany.query.filter(WantedCompany.tag_ko == value).update(dict(tag_ko=""))
-            
-            if search_query:
-                db.session.commit() # 데이터에 반영
-            
-                return Response('Delete Success',200)
-            else:
-                return jsonify('Not found',404)     
+    total = len(reuslt)
+    pagination_users  = reuslt[offset: offset + per_page]
+    pagination = Pagination(page=page, per_page=per_page, total=total,
+                            css_framework='bootstrap4')
+    return pagination_users, page,per_page,pagination
 
-        elif tag_type=='tag_en':
-            search_query = WantedCompany.query.filter(WantedCompany.tag_en == value).update(dict(tag_en=""))
-          
-            if search_query:
-                db.session.commit() # 데이터에 반영
-            
-                return Response('Delete Success',200)
-            else:
-                return jsonify('Not found',404)     
+def death(column_name,concept_id):
+    cur  = get_db_connection()
+    offset=0
+    per_page=10
+    
+    query = f"SELECT person_id,death_date,death_datetime,cause_concept_id,death_type_concept_id from de.death where {column_name} = {concept_id};" 
+    cur.execute(query)
+       
+    rows = cur.fetchall()
+    
+    dicts = {}
+    reuslt = []
+    for row in rows :
         
-        elif tag_type=='tag_ja':
-            search_query = WantedCompany.query.filter(WantedCompany.tag_ja == value).update(dict(tag_ja=""))
-          
-            db.session.commit() # 데이터에 반영
-  
-            if search_query:
-                db.session.commit() # 데이터에 반영
-            
-                return Response('Delete Success',200)
-            else:
-                return jsonify('Not found',404)  
+        dicts = {"person_id":row[0],"death_date":row[1],"death_datetime":row[2],"cause_concept_id":row[3],"death_type_concept_id":row[4]}
+        reuslt.append(dicts)
+   
+    page, per_page, offset = get_page_args(page_parameter='page',
+                                           per_page_parameter='per_page')
+    
+    total = len(reuslt)
+    pagination_users  = reuslt[offset: offset + per_page]
+    pagination = Pagination(page=page, per_page=per_page, total=total,
+                            css_framework='bootstrap4')
+    return pagination_users, page,per_page,pagination
+    
+def visit_concept(column_name,concept_id):
+    cur  = get_db_connection()
+    offset=0
+    per_page=10
+    
+    query = f"SELECT visit_occurrence_id,person_id,visit_concept_id from de.visit_occurrence vo where {column_name} = {concept_id};" 
+    cur.execute(query)
+       
+    rows = cur.fetchall()
+    
+    dicts = {}
+    reuslt = []
+    for row in rows :
+        
+        dicts = {"visit_occurrence_id":row[0],"person_id":row[1],"visit_concept_id":row[2]}
+        reuslt.append(dicts)
+   
+    page, per_page, offset = get_page_args(page_parameter='page',
+                                           per_page_parameter='per_page')
+    
+    total = len(reuslt)
+    pagination_users  = reuslt[offset: offset + per_page]
+    pagination = Pagination(page=page, per_page=per_page, total=total,
+                            css_framework='bootstrap4')
+    return pagination_users, page,per_page,pagination
 
-  
-# Tag 기준 컬럼 내용 업데이트    
-@search_api.route("/tag/put/<string:tag_type>/<string:tag_value>/<string:update_value>", methods=['PUT'])
-class TagUpdate(Resource):
-    @staticmethod    
-    @search_api.doc(responses={200: 'Update'})
-    @search_api.doc(responses={404: 'Not found'})
-    @search_api.doc(responses={405: 'Not allowed'})
-    @search_api.doc(responses={400: 'Bad request'})
+def condition_occurence(column_name,concept_id):
+    cur  = get_db_connection()
+    offset=0
+    per_page=10
+    
+    query = f"SELECT condition_occurrence_id, person_id ,condition_concept_id ,condition_source_value ,condition_source_concept_id  from de.condition_occurrence co  where {column_name} = {concept_id};" 
+    cur.execute(query)
+       
+    rows = cur.fetchall()
+    
+    dicts = {}
+    reuslt = []
+    for row in rows :
+        
+        dicts = {"condition_occurrence_id":row[0],"person_id":row[1],"condition_concept_id":row[2],"condition_source_value":row[3],"condition_source_concept_id":row[4]}
+        reuslt.append(dicts)
+   
+    page, per_page, offset = get_page_args(page_parameter='page',
+                                           per_page_parameter='per_page')
+    
+    total = len(reuslt)
+    pagination_users  = reuslt[offset: offset + per_page]
+    pagination = Pagination(page=page, per_page=per_page, total=total,
+                            css_framework='bootstrap4')
+    return pagination_users, page,per_page,pagination
+    
+    
 
-    def put(tag_type,tag_value,update_value):
-        if tag_type=='tag_ko':
+# Person Stastics
+@app.route('/statistics/person', methods=['GET'])
+def statistics_person():
+    if request.method == 'GET':
+        print('row')
+        
+        cur  = get_db_connection()
+        
+        cur.execute("""
+                    SELECT count(person_id), count(case when gender_concept_id = 8532 then 8532 end) , count(case when gender_concept_id = 8507 then 8507 end),
+                    count(case when race_concept_id = 8515 then 8515 end) , count(case when race_concept_id = 8527 then 8527 end), count(case when race_concept_id = 8516 then 8516 end), count(case when race_concept_id = 0 then 0 end) , (select count(person_id)from de.death d) as Death  from de.person ;
 
-            search_query = WantedCompany.query.filter(WantedCompany.tag_ko == tag_value).update(dict(tag_ko=update_value))
-          
+                    """)
+       
+        rows = cur.fetchall()
+        
+        
+        dicts = {}
+        
+        for row in rows :
+            dicts = {"person":row[0],"female":row[1],"male":row[2],"8515":row[3],"8527":row[4],"8516":row[5],"0":row[6],"death":row[7]}
+        
+        return jsonify(dicts)
 
-            if search_query:
-                db.session.commit() # 데이터에 반영
+
+# Visit Stastics
+@app.route('/statistics/visit', methods=['GET'])
+def statistics_visit():
+    if request.method == 'GET':
+        
+        cur  = get_db_connection()
+        
+        cur.execute("""
+                    SELECT count(case when gender_concept_id  = 8532 then 8532 end),count(case when gender_concept_id  = 8507 then 8507 end), 
+                    count(case when race_concept_id  = 8515 then 8515 end),  count(case when race_concept_id = 8527 then 8527 end), count(case when race_concept_id  = 8516 then 8516 end),count(case when race_concept_id  = 0 then 0 end),
+                    count(case when visit_concept_id  = 9201 then 9201 end) as Inpatient , count(case when visit_concept_id  = 9202 then 9202 end) as Outpatient , count(case when visit_concept_id  = 9203 then 9203 end) as Emergency
+                    FROM de.visit_occurrence, de.person where de.visit_occurrence .person_id  = de.person .person_id ;
+                    """)
+       
+        rows = cur.fetchall()
+        
+        
+        
+        dicts = {}
+        
+        for row in rows :
+            dicts = {"female":row[0],"male":row[1],"8515":row[2],"8527":row[3],"8516":row[4],"0":row[5],"Inpatient":row[6],"Outpatient":row[7],"Emergency":row[8]}
+        
+        return jsonify(dicts)
+
+
+
+# Visit Stastics
+@app.route('/search/<table_name>/<column_name>/<concept_id>', methods=['GET'])
+def search_concept(table_name,column_name,concept_id):
+    if request.method == 'GET':
+        
+        concept_id = int(concept_id)
+      
+        
+        if  table_name == 'concept':
+            pagination_users, page,per_page,pagination = concept(column_name,concept_id)
             
-                return Response('Update Success',200)
-            else:
-                return jsonify('Not found',404)  
+            return render_template('concept.html',
+                           results=pagination_users,
+                           page=page,
+                           per_page=per_page,
+                           pagination=pagination,
+                           )            
+        elif table_name == 'drug_exposure':
+            pagination_users, page,per_page,pagination = concept_drug(column_name,concept_id)
             
+            return render_template('drug_index.html',
+                           results=pagination_users,
+                           page=page,
+                           per_page=per_page,
+                           pagination=pagination,
+                           )
             
-  
-        elif tag_type=='tag_en':
-            search_query = WantedCompany.query.filter(WantedCompany.tag_en == tag_value).update(dict(tag_en=update_value))
-          
-            if search_query:
-                db.session.commit() # 데이터에 반영
+        elif table_name == 'visit_occurrence':
+            pagination_users, page,per_page,pagination = visit_concept(column_name,concept_id)
             
-                return Response('Update Success',200)
-            else:
-                return jsonify('Not found',404)  
+            return render_template('visit_occurrence.html',
+                           results=pagination_users,
+                           page=page,
+                           per_page=per_page,
+                           pagination=pagination,
+                           )
+        elif table_name == 'condition_occurrence':
+            pagination_users, page,per_page,pagination = condition_occurence(column_name,concept_id)
             
-        elif tag_type=='tag_ja':
-            search_query = WantedCompany.query.filter(WantedCompany.tag_ja == tag_value).update(dict(tag_ja=update_value))
-          
-            if search_query:
-                db.session.commit() # 데이터에 반영
+            return render_template('condition_occurrence.html',
+                           results=pagination_users,
+                           page=page,
+                           per_page=per_page,
+                           pagination=pagination,
+                           )
             
-                return Response('Update Success',200)
-            else:
-                return jsonify('Not found',404)  
+        elif table_name == 'death':
+            pagination_users, page,per_page,pagination = death(column_name,concept_id)
+            
+            return render_template('death.html',
+                           results=pagination_users,
+                           page=page,
+                           per_page=per_page,
+                           pagination=pagination,
+                           )
+        

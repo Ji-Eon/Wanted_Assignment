@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>flask-bootstrap example</title>
+    <!-- Bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container">
+     
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>concept_id</th>
+              <th>concept_name</th>
+              <th>domain_id</th>
+              <th>vocabulary_id</th>
+              <th>concept_code</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for data in results %}
+            <tr>
+              <td>{{ loop.index + (page - 1) * per_page }}</td>
+              <td>{{ data.concept_id }}</td>
+              <td>{{ data.concept_name }}</td>
+              <td>{{ data.domain_id }}</td>
+              <td>{{ data.vocabulary_id }}</td>
+              <td>{{ data.concept_code }}</td>
+              
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {{ pagination.links }}
+    </div>
+  </body>
+</html>

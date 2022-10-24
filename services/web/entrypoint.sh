@@ -11,9 +11,5 @@ then
     echo "PostgreSQL started"
 fi
 
-## DB 생성
-python manage.py create_db
-## Wanted Data Insert
-python manage.py insert_wanted
 
 exec "$@"
